@@ -6,141 +6,58 @@
 	<button id="play">Play</button>
 	<button id="stop">Stop</button>
 	
+	<select id="layer-2">
+		<option value='harmony/piano-guitar'>harmony/piano-guitar</option>
+		<option value='null'>null</option>
+	</select>
+
+	<script src="looper/script.js"></script>
+	
 <script>
-	//It looks like audio buffer's meant for clips <45 seconds long; if that's the case, we might have to use MediaElementAudioSourceNode; but if that's the case, would it just be better to use a bunch of media elements? (if people have song tracks side-by-side greater than 45 seconds- which is extremely likely- we'll need to use media elements and line them up, in which case this whole setup seems unnecessary)
-	
-	//divs filled with audio elements, like characters? Connect the correct ones, save a common time? (the trick will be, I think, lining them up. One of the elements would have to be the reference against which every other piece is checked; probably layer 0)
 
-	var context=new AudioContext();
+var music={
+	'happy':[
+		['drums/simple']
+		,['bass']
+		,['harmony/piano-guitar']
+		,[null,null,null,'melody/guitar',null,'melody/marimba',null,null]
+	]
+};
+
+var song=new Looper();
+
+//Load all relevant files
+song.load([
+	'happy/drums/simple'
+	,'happy/bass'
+	,'happy/harmony/piano-guitar'
+	,'happy/melody/guitar'
+	,'happy/melody/marimba'
+]).then((values)=>{
+	loopDuration=values[0].duration;
+});
+
+//UI BUTTONS//
+document.getElementById('play').addEventListener('click',function(){
+	song.playTrack('happy');
+});
+
+document.getElementById('stop').addEventListener('click',function(){
+	song.stopTrack('happy')
+});
+
+//Testing enabling and disabling different layers
+document.getElementById('layer-2').addEventListener('change',function(event){
+	var value=this.value;
+	if(value==='null') value=[null];
+	else value=value.split('|');
+
+	song.adjustLayer('happy',2,value);
 	
-	var timestamp=0;
-	var loopDuration=0;
-	var loops=0;
-	var startTime=0;
-	
-	//Sounds must be an array of objects
-	var sounds={};
-	
-	function load(tracks,loop=0){
-		console.log('run');
-	
-		var promises=[];
-		
-		//console.log(tracks);
-		
-		for(var track in tracks){
-			//Layers
-			for(var i=0;i<tracks[track].length;i++){
-				var get=loop % tracks[track][i].length;
-				//console.log('LOADING LAYER',get,tracks[track][i][get]);
-				
-				//Skip over null tracks
-				if(tracks[track][i][get]===null) continue;
-			
-				//Load first file in each layer
-				promises.push(
-					new Promise(function(resolve,reject){
-						fetch(track+'/'+tracks[track][i][get]+'.mp3')
-						.then(response=>response.arrayBuffer())
-						.then(buffer=>context.decodeAudioData(buffer,resolve,reject))
-					})
-				);
-			}
-		};
-		
-		console.log(promises,timestamp);
-		
-		//Once all audio's loaded, play it!
-		Promise.all(promises).then((values)=>{
-		
-			var newTimestamp=new Date().getTime()/1000;
-		
-			var startThis=0;
-			
-			//if(loops===0) context.currentTime=0;
-			if(loop===0){
-				startTime=context.currentTime;
-			}else{
-				var currentTime=context.currentTime-startTime;
-				
-				console.log((values[0].duration*loop)-currentTime);
-			
-				startThis=(values[0].duration*loop)-currentTime;
-				startThis=(values[0].duration)+(currentTime);
-			}
-			
-			for(var i=0;i<values.length;i++){
-			
-				//Create and play source
-				var source=context.createBufferSource();
-				source.buffer=values[i];
-				
-				//Preload next tracks
-				if(i===0){
-					//On first loop, load the next one!
-					if(loop===0){
-						loopDuration=values[0].duration;
-						load(tracks,loop+1);
-					}
-				
-					//On ending a loop, load the one after the FOLLOWING one; the next one should start playing immediately
-					source.onended=function(event){
-						load(tracks,loop+2);
-					};
-				}
-				
-				source.connect(context.destination);
-				source.start(startThis);
-			}
-		});
-	}
-	
-	//Get set up with a series of promises Promise.all sorta deal
-	
-	function error(){};
-	
-	load({
-		'happy':[
-			['drums/simple']
-			//,['bass']
-			//,['harmony/piano-guitar']
-			//,[null,null,null,'melody/guitar',null,'melody/marimba',null,null]
-		]
-	});
-	
-	function toggle(name,action='play'){
-		for(var i=0;i<sounds[name].length;i++){
-			console.log(sounds[name][i]);
-			for(var sound in sounds[name][i]){
-				var thisSound=sounds[name][i][sound];
-			
-				if(action==='play'){
-					thisSound.source=context.createBufferSource();
-					thisSound.source.buffer=thisSound.buffer;
-					thisSound.source.loop=true;
-					thisSound.source.connect(context.destination);
-				
-					console.log(thisSound.buffer.duration);
-				
-					console.log('TIME OFFSET',context.currentTime % thisSound.buffer.duration);
-				
-					thisSound.source.start(0);
-					thisSound.source.currentTime=5;
-				}
-				else if(action==='stop') thisSound.source.stop(0);
-			}
-		}
-		
-		//Calculate time to start this audio clip, assuming start times are meant to be the same for all
-		//var startAt=;
-		
-		//Play
-		//source.start(0);
-	}
-	
-	//document.getElementById('play').addEventListener('click',function(){toggle('music','play');});
-	//document.getElementById('stop').addEventListener('click',function(){toggle('music','stop');});
+	console.log(value);
+});
+
 </script>
-
+	
 </body>
 </html>
