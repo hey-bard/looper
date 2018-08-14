@@ -9,7 +9,7 @@ function Looper(input={track:[],path:''}){
 	L.context=new AudioContext();
 	L.currentBar=0;
 	
-	//User valuse
+	//User values
 	L.bars=input.bars || 4;					//How many bars the Looper has
 	L.repeatFrom=input.repeatFrom || 0;		//Where to repeat from once finish
 	L.track=input.track;					//The track info
@@ -30,7 +30,7 @@ function Looper(input={track:[],path:''}){
 			//Skip null files
 			if(files[i]===null) continue;
 			
-			let fileName=L.path+'/'+files[i];
+			let fileName=L.path+files[i];
 		
 			//Skip over buffered and buffering tracks
 			if(buffer[fileName]) continue;
@@ -57,7 +57,7 @@ function Looper(input={track:[],path:''}){
 	
 	//Play the track
 	L.playTrack=function(){
-		if(loopDuration===0) throw 'Error: Files not loaded!';
+		if(loopDuration===0) throw 'Error: Base file not loaded yet! We don\'t know the loopDuration yet.';
 		
 		//If we're playing, stop before playing again
 		if(loopInterval!==null){
@@ -75,13 +75,16 @@ function Looper(input={track:[],path:''}){
 	
 	function playLoop(){
 		for(var i=0;i<L.track.length;i++){
+			
 			var get=L.currentBar % L.track[i].length;
 			
-			let fileName=L.path+'/'+L.track[i][get];
+			//Skip null items
+			if(L.track[i][get]===null) continue;
+			
+			let fileName=L.path+L.track[i][get];
 			
 			//Skip over unbuffered files as a safeguard
 			if(!buffer[fileName] || buffer[fileName]==='LOADING'){
-				console.log(fileName+' not buffered yet!');
 				continue;
 			}
 			
@@ -91,14 +94,12 @@ function Looper(input={track:[],path:''}){
 			source.start(0);
 			
 			//Track sources
-			if(!sources[L.track]) sources[L.track]={};
-			sources[L.track][fileName]=source;
+			sources[fileName]=source;
 		}
 		
 		//See if we've passed the number of bars
 		if(L.currentBar>L.bars){
 			L.currentBar=L.repeatFrom;
-			console.log(L.currentBar);
 			//If we're not looping, stop
 			if(L.loop===false){
 				L.stopTrack();
@@ -107,8 +108,8 @@ function Looper(input={track:[],path:''}){
 	}
 	
 	L.stopTrack=function(){
-		for(var file in sources[L.track]){
-			sources[L.track][file].stop(0);
+		for(var file in sources){
+			sources[file].stop(0);
 		}
 		
 		clearInterval(loopInterval);
@@ -116,8 +117,17 @@ function Looper(input={track:[],path:''}){
 	}
 	
 	L.adjustLayer=function(layer,input){
-		//for(
-		//sources[track][
+		//Append layer if requested
+		if(layer==='new') layer=L.track.length;
+		
+		//If layer doesn't exist, add it
+		if(!L.track[layer]) L.track[layer]=[];
+		
+		//Pause current layer
+		for(var i=0;i<L.track[layer].length;i++){
+			let source=sources[L.path+L.track[layer][i]];
+			if(source) source.stop(0);
+		}
 		
 		//Once successfully load any not-loaded files, continue
 		L.load(input).then(()=>{
