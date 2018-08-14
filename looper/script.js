@@ -15,6 +15,7 @@ function Looper(input={track:[],path:''}){
 	L.track=input.track;					//The track info
 	L.path=input.path;						//The path to the files
 	L.loop=input.loop || false;				//Whether to loop
+	L.autoplay=input.autoplay || false;		//Whether to automatically play on loading
 	
 	var loopInterval=null;
 	var buffer={};
@@ -57,11 +58,15 @@ function Looper(input={track:[],path:''}){
 	
 	//Play the track
 	L.playTrack=function(){
-		if(loopDuration===0) throw 'Error: Base file not loaded yet! We don\'t know the loopDuration yet.';
+		if(loopDuration===0){
+			L.autoplay=true;
+			console.log('Setting autoplay to true so will start once loaded...');
+			return;
+		}
 		
-		//If we're playing, stop before playing again
+		//If we're playing, exit
 		if(loopInterval!==null){
-			L.stopTrack();
+			return;
 		}
 		
 		loopInterval=setInterval(function(){
@@ -145,5 +150,6 @@ function Looper(input={track:[],path:''}){
 	
 	L.load(loadItems).then((values)=>{
 		loopDuration=values[0].duration;
+		if(L.autoplay===true) L.playTrack();
 	});
 }
