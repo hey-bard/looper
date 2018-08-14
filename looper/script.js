@@ -79,6 +79,20 @@ function Looper(input={track:[],path:''}){
 	}
 	
 	function playLoop(){
+		//See if we've passed the number of bars
+		if(L.currentBar>=L.bars){
+			//If we're not looping, stop
+			if(L.loop===false){
+				L.stopTrack();
+			}
+			
+			//If we're looping, go back to repeatFrom
+			L.currentBar=L.repeatFrom;
+		}
+		
+		console.log(L.currentBar,L.bars);
+		
+		//Play all layers
 		for(var i=0;i<L.track.length;i++){
 			
 			var get=L.currentBar % L.track[i].length;
@@ -101,15 +115,10 @@ function Looper(input={track:[],path:''}){
 			//Track sources
 			sources[fileName]=source;
 		}
+	}
+	
+	L.pauseTrack=function(){
 		
-		//See if we've passed the number of bars
-		if(L.currentBar>L.bars){
-			L.currentBar=L.repeatFrom;
-			//If we're not looping, stop
-			if(L.loop===false){
-				L.stopTrack();
-			}
-		}
 	}
 	
 	L.stopTrack=function(){
