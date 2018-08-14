@@ -17,10 +17,12 @@ function Looper(input={track:[],path:''}){
 	L.loop=input.loop || false;				//Whether to loop
 	L.autoplay=input.autoplay || false;		//Whether to automatically play on loading
 	
-	var loopInterval=null;
+	var loopTimeout=null;
 	var buffer={};
 	var sources={};
 	var loopDuration=0;
+	var paused=0;							//0 if unpaused; a number of how far into the loop we are; -1 if in the process of pausing
+	var timeStartedLoop;
 	
 	//Load files from an array
 	L.load=function(files){
@@ -57,40 +59,62 @@ function Looper(input={track:[],path:''}){
 	}
 	
 	//Play the track
-	L.playTrack=function(){
+	L.play=function(){
 		if(loopDuration===0){
 			L.autoplay=true;
 			console.log('Setting autoplay to true so will start once loaded...');
 			return;
 		}
 		
-		//If we're playing, exit
-		if(loopInterval!==null){
+		//If we're paused start playing again
+		if(paused>0){
+			console.log(loopDuration,paused);
+			
+			//Start up the interval based on pause time
+			L.context.resume().then(()=>{
+				startTimeout(loopDuration-paused);
+				
+				//Estimate how far into the loop we are
+				timeStartedLoop=new Date().getTime()-paused;
+				
+				paused=0;
+			});
 			return;
 		}
 		
-		loopInterval=setInterval(function(){
-			L.currentBar++;
-			playLoop();
-		},Math.floor(loopDuration*1000));
+		//If we're playing, exit
+		if(loopTimeout!==null){
+			return;
+		}
+		
+		startTimeout();
 		L.currentBar=0;
 		
 		playLoop();
 	}
 	
+	function startTimeout(waitFor=loopDuration){
+		loopTimeout=setTimeout(function(){
+			L.currentBar++;
+			playLoop();
+			startTimeout();
+		},waitFor);
+	}
+	
 	function playLoop(){
+		timeStartedLoop=new Date().getTime();
+		
 		//See if we've passed the number of bars
 		if(L.currentBar>=L.bars){
 			//If we're not looping, stop
 			if(L.loop===false){
-				L.stopTrack();
+				L.stop();
+				return;
 			}
 			
 			//If we're looping, go back to repeatFrom
 			L.currentBar=L.repeatFrom;
 		}
-		
-		console.log(L.currentBar,L.bars);
 		
 		//Play all layers
 		for(var i=0;i<L.track.length;i++){
@@ -117,17 +141,27 @@ function Looper(input={track:[],path:''}){
 		}
 	}
 	
-	L.pauseTrack=function(){
+	L.pause=function(){
+		//If we're already paused, don't do it!
+		if(paused!==0) return;
 		
+		//In the process of pausing
+		paused=-1;
+		
+		//Paused is set based on how far into the loop we are, so we start the next timeout in good time
+		L.context.suspend().then(()=>{
+			paused+=new Date().getTime()-timeStartedLoop;
+			clearTimeout(loopTimeout);
+		});
 	}
 	
-	L.stopTrack=function(){
+	L.stop=function(){
 		for(var file in sources){
 			sources[file].stop(0);
 		}
 		
-		clearInterval(loopInterval);
-		loopInterval=null;
+		clearTimeout(loopTimeout);
+		loopTimeout=null;
 	}
 	
 	L.adjustLayer=function(layer,input){
@@ -165,7 +199,7 @@ function Looper(input={track:[],path:''}){
 	}
 	
 	L.load(loadItems).then((values)=>{
-		loopDuration=values[0].duration;
-		if(L.autoplay===true) L.playTrack();
+		loopDuration=Math.floor(values[0].duration*1000);
+		if(L.autoplay===true) L.play();
 	});
 }
