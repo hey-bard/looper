@@ -131,6 +131,13 @@ function Looper(input={track:[],path:''}){
 		//Pause current layer
 		for(var i=0;i<L.track[layer].length;i++){
 			let source=sources[L.path+L.track[layer][i]];
+			
+			//If the file currently playing won't change, don't pause it!
+			let getOld=L.currentBar % L.track[layer].length;
+			let getNew=L.currentBar % input.length;
+			if(L.track[layer][getOld]===input[getNew]) continue;
+			
+			//If the source exists and isn't the same as the one that it's being set to
 			if(source) source.stop(0);
 		}
 		
