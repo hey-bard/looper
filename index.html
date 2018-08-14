@@ -6,8 +6,23 @@
 	<button id="play">Play</button>
 	<button id="stop">Stop</button>
 	
+	<select id="layer-0">
+		<option value='drums/full-a'>drums/full-a</option>
+		<option value='drums/full-b'>drums/full-b</option>
+		<option value='drums/full-c'>drums/full-c</option>
+		<option value='drums/simple'>drums/simple</option>
+		<option value='null'>null</option>
+	</select>
+	
+	<select id="layer-1">
+		<option value='bass'>bass</option>
+		<option value='null'>null</option>
+	</select>
+	
 	<select id="layer-2">
 		<option value='harmony/piano-guitar'>harmony/piano-guitar</option>
+		<option value='harmony/strings-heavy'>harmony/strings-heavy</option>
+		<option value='harmony/strings-light'>harmony/strings-light</option>
 		<option value='null'>null</option>
 	</select>
 
@@ -21,18 +36,12 @@ var song=new Looper({
 		['drums/simple']
 		,['bass']
 		,['harmony/piano-guitar']
-		,[null,null,null,'melody/guitar',null,'melody/marimba',null,null]
+		,[null,null,null,'melody/guitar',null,'melody/woodwinds',null,null]
 	]
+	,bars:8
+	,repeatFrom:3
+	,loop:true
 });
-
-//Load all relevant files
-song.load([
-	'drums/simple'
-	,'bass'
-	,'harmony/piano-guitar'
-	,'melody/guitar'
-	,'melody/marimba'
-]);
 
 //UI BUTTONS//
 document.getElementById('play').addEventListener('click',function(){
@@ -44,15 +53,19 @@ document.getElementById('stop').addEventListener('click',function(){
 });
 
 //Testing enabling and disabling different layers
-document.getElementById('layer-2').addEventListener('change',function(event){
+document.getElementById('layer-0').addEventListener('change',adjustLayer);
+document.getElementById('layer-1').addEventListener('change',adjustLayer);
+document.getElementById('layer-2').addEventListener('change',adjustLayer);
+
+function adjustLayer(){
 	var value=this.value;
 	if(value==='null') value=[null];
 	else value=value.split('|');
 
-	song.adjustLayer(2,value);
+	song.adjustLayer(this.id.split('-')[1],value);
 	
 	console.log(value);
-});
+}
 
 </script>
 	
