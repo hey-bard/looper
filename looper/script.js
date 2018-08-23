@@ -1,8 +1,5 @@
 function Looper(input={track:[],path:''}){
-	
-	//It looks like audio buffer's meant for clips <45 seconds long; if that's the case, we might have to use MediaElementAudioSourceNode; but if that's the case, would it just be better to use a bunch of media elements? (if people have song tracks side-by-side greater than 45 seconds- which is extremely likely- we'll need to use media elements and line them up, in which case this whole setup seems unnecessary)
-	
-	//divs filled with audio elements, like characters? Connect the correct ones, save a common time? (the trick will be, I think, lining them up. One of the elements would have to be the reference against which every other piece is checked; probably layer 0)
+	//Looper isn't recommended for audio files >45 seconds
 	
 	const L=this;
 
@@ -10,7 +7,7 @@ function Looper(input={track:[],path:''}){
 	L.currentBar=0;
 	
 	//User values
-	L.bars=input.bars || 4;					//How many bars the Looper has
+	L.bars=input.bars || 4;					//How many bars the Looper has (a bar is the length of the first element in the first layer)
 	L.repeatFrom=input.repeatFrom || 0;		//Where to repeat from once finish
 	L.track=input.track;					//The track info
 	L.path=input.path;						//The path to the files
@@ -30,28 +27,36 @@ function Looper(input={track:[],path:''}){
 		
 		//BUFFER FILES//
 		for(var i=0;i<files.length;i++){
-			//Skip null files
+			//Skip null
 			if(files[i]===null) continue;
 			
-			let fileName=L.path+files[i];
-		
-			//Skip over buffered and buffering tracks
-			if(buffer[fileName]) continue;
+			//Get all listed files (if we have random choices)
+			var fileChoices=files[i].split('||');
+			for(var ii=0;ii<fileChoices.length;ii++){
+				//Skip null files
+				if(fileChoices[ii]===null) continue;
+				
+				//Get all the files
+				let fileName=L.path+fileChoices[ii];
+			
+				//Skip over buffered and buffering tracks
+				if(buffer[fileName]) continue;
 
-			buffer[fileName]='LOADING';
-		
-			promises.push(
-				new Promise(function(resolve,reject){
-					fetch(fileName+'.mp3')
-					.then(response=>response.arrayBuffer())
-					.then(file=>{
-						L.context.decodeAudioData(file,function(info){
-							buffer[fileName]=info;
-							resolve(info);
-						},reject);
+				buffer[fileName]='LOADING';
+			
+				promises.push(
+					new Promise(function(resolve,reject){
+						fetch(fileName+'.mp3')
+						.then(response=>response.arrayBuffer())
+						.then(file=>{
+							L.context.decodeAudioData(file,function(info){
+								buffer[fileName]=info;
+								resolve(info);
+							},reject);
+						})
 					})
-				})
-			);
+				);
+			}
 		}
 		
 		//Return a promise with the info
@@ -124,20 +129,25 @@ function Looper(input={track:[],path:''}){
 			//Skip null items
 			if(L.track[i][get]===null) continue;
 			
-			let fileName=L.path+L.track[i][get];
+			//If we have a file list, get one of the listed files
+			var files=L.track[i][get].split('||');
+			var fileNum=Math.floor(files.length*Math.random());
+			//Don't go beyond the last file (there's a miniscule chance this can happen)
+			if(fileNum>=files.length) fileNum=files.length-1;
+			let fileName=files[fileNum];
+			
+			//Skip null items
+			if(fileName===null) continue;
+			
+			//Add the path on
+			fileName=L.path+fileName;
 			
 			//Skip over unbuffered files as a safeguard
 			if(!buffer[fileName] || buffer[fileName]==='LOADING'){
 				continue;
 			}
 			
-			var source=L.context.createBufferSource();
-			source.buffer=buffer[fileName];
-			source.connect(L.context.destination);
-			source.start(0);
-			
-			//Track sources
-			sources[fileName]=source;
+			playBuffer(fileName);
 		}
 	}
 	
@@ -164,12 +174,19 @@ function Looper(input={track:[],path:''}){
 		loopTimeout=null;
 	}
 	
+	L.remove=function(){
+		clearTimeout(loopTimeout);
+		L.context.close();
+	}
+	
 	L.adjustLayer=function(layer,input){
 		//Append layer if requested
 		if(layer==='new') layer=L.track.length;
 		
 		//If layer doesn't exist, add it
 		if(!L.track[layer]) L.track[layer]=[];
+		
+		var playThis=null;
 		
 		//Pause current layer
 		for(var i=0;i<L.track[layer].length;i++){
@@ -181,13 +198,29 @@ function Looper(input={track:[],path:''}){
 			if(L.track[layer][getOld]===input[getNew]) continue;
 			
 			//If the source exists and isn't the same as the one that it's being set to
-			if(source) source.stop(0);
+			if(source){
+				source.stop(0);
+				
+				//Remember item to play
+				playThis=L.path+input[getNew];
+			}
 		}
 		
 		//Once successfully load any not-loaded files, continue
 		L.load(input).then(()=>{
 			L.track[layer]=input;
+			playBuffer(playThis,(new Date().getTime()-timeStartedLoop)/1000);
 		});
+	}
+	
+	function playBuffer(fileName,offset=0){
+		var source=L.context.createBufferSource();
+		source.buffer=buffer[fileName];
+		source.connect(L.context.destination);
+		source.start(0,offset);
+		
+		//Track sources
+		sources[fileName]=source;
 	}
 	
 	//START//
@@ -200,6 +233,6 @@ function Looper(input={track:[],path:''}){
 	
 	L.load(loadItems).then((values)=>{
 		loopDuration=Math.floor(values[0].duration*1000);
-		if(L.autoplay===true) L.play();
+		if(L.autoplay) L.play();
 	});
 }
