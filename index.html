@@ -1,55 +1,95 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<title>Song Demo</title>
+	<meta name="description" content="Integrate Twitter comments rather than hosting your own!">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<link rel="stylesheet" href="styles.css">
+	
+	<!--Favicons-->
+	<link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
+	<link rel="manifest" href="/favicons/manifest.json">
+	<link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#5bbad5">
+	<link rel="shortcut icon" href="/favicons/favicon.ico">
+	<meta name="msapplication-config" content="/favicons/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
+</head>
 <body>
-<p>PLAY MUSIC!</p>
+<header>
+	<nav>
+		<span><img class="svg-inline" src="design-files/icon.svg"></span>
+		<a href="https://github.com/joshpowlison/looper"><p>Github</p></a>
+		<a href="https://github.com/joshpowlison/looper/tree/develop"><p>Dev Branch</p></a>
+	</nav>
+</header>
+<main>
 
-	<button id="play">Play</button>
-	<button id="stop">Stop</button>
-	
-	<select id="layer-0">
-		<option value='drums/full-a'>drums/full-a</option>
-		<option value='drums/full-b'>drums/full-b</option>
-		<option value='drums/full-c'>drums/full-c</option>
-		<option value='drums/simple'>drums/simple</option>
-		<option value='null'>null</option>
-	</select>
-	
-	<select id="layer-1">
-		<option value='bass'>bass</option>
-		<option value='null'>null</option>
-	</select>
-	
-	<select id="layer-2">
-		<option value='harmony/piano-guitar'>harmony/piano-guitar</option>
-		<option value='harmony/strings-heavy'>harmony/strings-heavy</option>
-		<option value='harmony/strings-light'>harmony/strings-light</option>
-		<option value='null'>null</option>
-	</select>
+<script src="looper/script.js"></script>
 
-	<script src="looper/script.js"></script>
-	
+<h1><img class="svg-inline" src="design-files/logo.svg" alt="Looper"></h1>
+
+<p id="intro">Making looping tracks with swappable layers!</p>
+
+<button id="play">Play</button>
+<button id="stop">Stop</button>
+<button id="pause">Pause</button>
+
+<select id="layer-0">
+	<option value='drums/full-a'>drums/full-a</option>
+	<option value='drums/full-b'>drums/full-b</option>
+	<option value='drums/full-c'>drums/full-c</option>
+	<option value='drums/simple'>drums/simple</option>
+	<option value='null'>null</option>
+</select>
+
+<select id="layer-1">
+	<option value='bass'>bass</option>
+	<option value='null'>null</option>
+</select>
+
+<select id="layer-2">
+	<option value='harmony/piano-guitar'>harmony/piano-guitar</option>
+	<option value='harmony/strings-heavy'>harmony/strings-heavy</option>
+	<option value='harmony/strings-light'>harmony/strings-light</option>
+	<option value='harmony/piano-guitar&harmony/strings-heavy'>harmony/piano-guitar&harmony/strings-heavy</option>
+	<option value='harmony/strings-light&harmony/strings-heavy'>harmony/strings-light&harmony/strings-heavy</option>
+	<option value='null'>null</option>
+</select>
+
 <script>
 
+//WACKY//
 var song=new Looper({
-	path:'music/happy/'
+	path:'music/silly/'
 	,track:[
-		['drums/simple']
-		,['bass']
-		,['harmony/piano-guitar']
-		,[null,null,null,'melody/guitar',null,'melody/woodwinds',null,null]
+		['drums/a1||drums/a2','drums/b1||drums/b2']
+		,['bass/main',null,null,null]
+		,['harmony',null,null,null]
+		,[null,null,null,null,	'melody/first',null,null,null,	null,null,null,null,				'melody/first',null,null,null]
+		,[null,null,null,null,	null,null,null,null,			'melody/second',null,null,null,		'melody/second',null,null,null]
+		,[null,null,null,null,	'bass/upper',null,null,null,	'bass/upper',null,null,null,		'bass/upper',null,null,null]
+		,[null,null,null,null,	null,null,null,null,			null,null,null,null,				'bass/extra',null,null,null]
 	]
-	,bars:8
-	,repeatFrom:3
+	,bars:16
+	,repeatFrom:12
 	,loop:true
 });
 
 //UI BUTTONS//
 document.getElementById('play').addEventListener('click',function(){
-	song.playTrack();
+	song.play();
 });
 
 document.getElementById('stop').addEventListener('click',function(){
-	song.stopTrack()
+	song.stop()
+});
+
+document.getElementById('pause').addEventListener('click',function(){
+	song.pause()
 });
 
 //Testing enabling and disabling different layers
@@ -60,14 +100,40 @@ document.getElementById('layer-2').addEventListener('change',adjustLayer);
 function adjustLayer(){
 	var value=this.value;
 	if(value==='null') value=[null];
-	else value=value.split('|');
+	else value=value.split('&');
 
 	song.adjustLayer(this.id.split('-')[1],value);
-	
-	console.log(value);
 }
 
 </script>
-	
+
+<h2>Install in 5 minutes!</h2>
+
+<p><a href="https://github.com/joshpowlison/looper/releases" target="_blank">Download</a> and put the <em>looper</em> folder on your website. Use this HTML:</p>
+
+<pre>
+&lt;script src="looper/script.js"&gt;&lt;/script&gt;
+&lt;script&gt;new Looper;&lt;/script&gt;
+</pre>
+
+<p>To customize your Looper, look at the code below!</p>
+
+<pre>
+&lt;script&gt;
+new Looper({
+<span id="code"></span>
+});
+&lt;/script&gt;
+
+<p id="propertyExplanation"></p></pre>
+
+<!--<h2>Used by:</h3>
+<div id="websites-using"><a href="http://gameplanmanga.com" target="_blank"><img src="images/gameplan-banner.jpg"></a></div>
+<p><small>Email me at <a href="mailto:joshuapowlison@gmail.com" target="_blank">joshuapowlison@gmail.com</a> if you want to be included in the list! I will not include NSFW stories.</small></p>-->
+
+<script src="script.js"></script>
+
+</main>
+<footer><p>Looper is Open Source under an MIT License. Version in Demo: DEV BRANCH</p></footer>
 </body>
 </html>
