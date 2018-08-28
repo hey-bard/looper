@@ -1,6 +1,6 @@
 {
-    "name": "Song",
-    "short_name": "Song",
+    "name": "Looper",
+    "short_name": "Looper",
     "icons": [
         {
             "src": "/favicons/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#721178",
+    "background_color": "#721178",
     "display": "standalone"
 }

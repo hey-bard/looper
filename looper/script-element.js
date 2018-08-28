@@ -3,7 +3,6 @@ function Looper(input={track:[],path:''}){
 	
 	const L=this;
 
-	L.context=new AudioContext();
 	L.currentBar=0;
 	
 	//User values
@@ -14,7 +13,9 @@ function Looper(input={track:[],path:''}){
 	L.loop=input.loop || false;				//Whether to loop
 	L.autoplay=input.autoplay || false;		//Whether to automatically play on loading
 	
-	var loopInterval=null;
+	var loopBase=null;
+	
+	var loopTimeout=null;
 	var buffer={};
 	var elements={};
 	var sources={};
@@ -39,7 +40,8 @@ function Looper(input={track:[],path:''}){
 			elements[fileName].preload='auto';
 			elements[fileName].controls=true;
 			elements[fileName].load();
-			//L.context.createMediaElementSource(elements[fileName]);
+			
+			if(i===0) loopBase=elements[fileName];
 			
 			promises.push(
 				new Promise(function(resolve,reject){
@@ -58,7 +60,7 @@ function Looper(input={track:[],path:''}){
 	}
 	
 	//Play the track
-	L.playTrack=function(){
+	L.play=function(){
 		if(loopDuration===0){
 			L.autoplay=true;
 			console.log('Setting autoplay to true so will start once loaded...');
@@ -66,37 +68,64 @@ function Looper(input={track:[],path:''}){
 		}
 		
 		//If we're playing, exit
-		if(loopInterval!==null){
+		if(loopTimeout!==null){
 			return;
 		}
 		
-		loopInterval=setInterval(function(){
-			L.currentBar++;
-			playLoop();
-		},Math.floor(loopDuration*1000));
-		L.currentBar=0;
-		
-		playLoop();
+		timeout(loopDuration-loopBase.currentTime);
+		playBar(L.currentBar);
+		L.paused=false;
 	}
 	
-	function playLoop(){
+	function timeout(wait=loopDuration){
+		loopTimeout=setTimeout(function(){
+			L.currentBar++;
+			
+			//Set all layers back to 0
+			for(var i=0;i<L.track.length;i++){
+				
+				var get=L.currentBar % L.track[i].length;
+				
+				//Skip null items
+				if(L.track[i][get]===null) continue;
+				
+				let fileName=L.path+L.track[i][get];
+				
+				//Skip over unbuffered files as a safeguard
+				if(!elements[fileName]){
+					continue;
+				}
+				
+				elements[fileName].currentTime=0;
+			}
+			
+			playBar(L.currentBar);
+			timeout();
+		},Math.floor(wait*1000));
+	}
+	
+	function playBar(bar=0){
+		if(L.paused){
+			
+		}
+		
 		//See if we've passed the number of bars
-		if(L.currentBar>=L.bars){
+		if(bar>=L.bars){
 			//If we're not looping, stop
 			if(L.loop===false){
 				L.stopTrack();
 			}
 			
 			//If we're looping, go back to repeatFrom
-			L.currentBar=L.repeatFrom;
+			bar=L.repeatFrom;
 		}
 		
-		console.log(L.currentBar,L.bars);
+		console.log(bar,L.bars);
 		
 		//Play all layers
 		for(var i=0;i<L.track.length;i++){
 			
-			var get=L.currentBar % L.track[i].length;
+			var get=bar % L.track[i].length;
 			
 			//Skip null items
 			if(L.track[i][get]===null) continue;
@@ -108,25 +137,30 @@ function Looper(input={track:[],path:''}){
 				continue;
 			}
 			
-			elements[fileName].currentTime=0;
 			elements[fileName].play();
 		}
 	}
 	
-	L.pauseTrack=function(){
+	L.paused=false;
+	L.pause=function(){
 		for(var element in elements){
 			elements[element].pause();
 		}
+		
+		L.paused=true;
+		clearTimeout(loopTimeout);
+		loopTimeout=null;
 	}
 	
-	L.stopTrack=function(){
+	L.stop=function(){
 		for(var element in elements){
 			elements[element].currentTime=0;
 			elements[element].pause();
 		}
 		
-		clearInterval(loopInterval);
-		loopInterval=null;
+		clearTimeout(loopTimeout);
+		loopTimeout=null;
+		L.currentBar=0;
 	}
 	
 	L.adjustLayer=function(layer,input){

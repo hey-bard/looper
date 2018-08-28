@@ -55,9 +55,44 @@ for(var i=0;i<properties.length;i++){
 }
 
 var propertyInfo={
-	window:"The element to put Ferret into. Ideally a div. Must be set."
-	,buttons:"An array of all the buttons. Buttons have many attributes: <strong>content</strong> sets the text, <strong>classes</strong> adds listed CSS classes, <strong>css</strong> adds CSS, <strong>tags</strong> are additional terms you can search for the button by, <strong>element</strong> is automatically set to the button's created element and can start unset or <em>null</em>, and <strong>action</strong> is where to go to on clicking the button."
-	,minSize:"The smallest a button can get if it's far back. Defaults to <em>.4</em>."
-	,fps:"How many frames per second to read mouse movements for scrubbing. Does not affect animation smoothness; animations should be smooth regardless of what this is set to. Defaults to <em>10</em>."
-	,query:"Save searches to the querystring, and load searches from the querystring. This allows going back and forward to revisit searches and creating links to specific searches. If <em>null</em>, this will be disabled; if anything else, it will be the query's name in the URL. Defaults to <em>null</em>."
+	context:"The audio context in use."
+	,currentBar:"The bar of the song we're on."
+	,bars:"The total number of bars in the song."
+	,repeatFrom:"When reach the end of the song, which bar to return to."
+	,track:"Contains an array of all the layers. The first item in the first array sets the duration of a loop. May reference files (assumed to be .mp3s) or be <em>null</em>."
+	,path:"The path to the song's folder."
+	,loop:"Whether or not we'll play at the end. I mean, it's called Looper, yeah, but this is still an option. Defaults to <em>false</em>"
+	,autoplay:"Whether or not to play as soon as it loads. Defaults to <em>false</em>."
+	,load:"A public function for loading the files."
+	,play:"A public function for playing the Looper."
+	,pause:"A public function for pausing the Looper. If played again, it will continue from where it was paused."
+	,stop:"A public function for stopping the Looper. If played again, it will play from the Looper's beginning."
+	,remove:"Gets rid of the Looper and closes its audio context."
+	,adjustLayer:"A public function for adjusting a layer while Looper is playing."
 };
+
+//UI BUTTONS//
+document.getElementById('play').addEventListener('click',function(){
+	song.play();
+});
+
+document.getElementById('stop').addEventListener('click',function(){
+	song.stop()
+});
+
+document.getElementById('pause').addEventListener('click',function(){
+	song.pause()
+});
+/*
+//Testing enabling and disabling different layers
+document.getElementById('layer-0').addEventListener('change',adjustLayer);
+document.getElementById('layer-1').addEventListener('change',adjustLayer);
+document.getElementById('layer-2').addEventListener('change',adjustLayer);
+
+function adjustLayer(){
+	var value=this.value;
+	if(value==='null') value=[null];
+	else value=value.split('&');
+
+	song.adjustLayer(this.id.split('-')[1],value);
+}*/

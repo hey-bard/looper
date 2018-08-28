@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Song Demo</title>
+	<title>Looper Demo</title>
 	<meta name="description" content="Integrate Twitter comments rather than hosting your own!">
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -38,6 +38,9 @@
 <button id="stop">Stop</button>
 <button id="pause">Pause</button>
 
+<p>Looper can still be greatly improved; if you're interested in helping out, check out the repository!</p>
+
+<!--
 <select id="layer-0">
 	<option value='drums/full-a'>drums/full-a</option>
 	<option value='drums/full-b'>drums/full-b</option>
@@ -45,6 +48,8 @@
 	<option value='drums/simple'>drums/simple</option>
 	<option value='null'>null</option>
 </select>
+
+<div id="audio-files"></div>
 
 <select id="layer-1">
 	<option value='bass'>bass</option>
@@ -58,15 +63,30 @@
 	<option value='harmony/piano-guitar&harmony/strings-heavy'>harmony/piano-guitar&harmony/strings-heavy</option>
 	<option value='harmony/strings-light&harmony/strings-heavy'>harmony/strings-light&harmony/strings-heavy</option>
 	<option value='null'>null</option>
-</select>
+</select>-->
 
 <script>
+//TEST//
+var song=new Looper({
+	path:'music/beat/'
+	,track:[
+		['kick']
+		,[null,null,null,null,'clap']
+		,[null,'hat',null,'hat',null]
+		,[null,'snare',null,'snare',null]
+		,[null,'synth','synth','synth','synth']
+	]
+	,bars:5
+	,repeatFrom:1
+	,loop:true
+});
 
+/*
 //WACKY//
 var song=new Looper({
 	path:'music/silly/'
 	,track:[
-		['drums/a1||drums/a2','drums/b1||drums/b2']
+		['drums/a1','drums/b1']
 		,['bass/main',null,null,null]
 		,['harmony',null,null,null]
 		,[null,null,null,null,	'melody/first',null,null,null,	null,null,null,null,				'melody/first',null,null,null]
@@ -77,33 +97,26 @@ var song=new Looper({
 	,bars:16
 	,repeatFrom:12
 	,loop:true
-});
-
-//UI BUTTONS//
-document.getElementById('play').addEventListener('click',function(){
-	song.play();
-});
-
-document.getElementById('stop').addEventListener('click',function(){
-	song.stop()
-});
-
-document.getElementById('pause').addEventListener('click',function(){
-	song.pause()
-});
-
-//Testing enabling and disabling different layers
-document.getElementById('layer-0').addEventListener('change',adjustLayer);
-document.getElementById('layer-1').addEventListener('change',adjustLayer);
-document.getElementById('layer-2').addEventListener('change',adjustLayer);
-
-function adjustLayer(){
-	var value=this.value;
-	if(value==='null') value=[null];
-	else value=value.split('&');
-
-	song.adjustLayer(this.id.split('-')[1],value);
-}
+});*/
+/*
+//CLOSURE//
+var song=new Looper({
+	path:'music/closure/'
+	,track:[
+		['harmony/starting']
+		,[null,'harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal']
+		,[null,null,null,'kick','kick','kick','kick','kick','kick','kick','kick','kick']
+		,[null,null,null,'bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub']
+		,[null,null,null,null,null,null,'snap','snap','snap','snap','snap','snap']
+		,[null,null,null,null,null,null,null,null,null,'melody',null,'bass/cello']
+		,[null,null,null,null,null,null,null,null,'harmony/emotion','harmony/emotion','harmony/emotion','harmony/emotion']
+		,[null,null,null,null,null,null,null,null,null,null,null,'harmony/deep-emotion']
+		,[null,null,null,null,null,null,null,null,null,null,null,'hat']
+	]
+	,bars:12
+	,repeatFrom:8
+	,loop:true
+});*/
 
 </script>
 
