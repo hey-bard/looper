@@ -179,7 +179,7 @@ function Looper(input={track:[],path:''}){
 		L.context.close();
 	}
 	
-	L.adjustLayer=function(layer,input){
+	L.adjustLayer=function(layer='new',replacement){
 		//Append layer if requested
 		if(layer==='new') layer=L.track.length;
 		
@@ -194,21 +194,21 @@ function Looper(input={track:[],path:''}){
 			
 			//If the file currently playing won't change, don't pause it!
 			let getOld=L.currentBar % L.track[layer].length;
-			let getNew=L.currentBar % input.length;
-			if(L.track[layer][getOld]===input[getNew]) continue;
+			let getNew=L.currentBar % replacement.length;
+			if(L.track[layer][getOld]===replacement[getNew]) continue;
 			
 			//If the source exists and isn't the same as the one that it's being set to
 			if(source){
 				source.stop(0);
 				
 				//Remember item to play
-				playThis=L.path+input[getNew];
+				playThis=L.path+replacement[getNew];
 			}
 		}
 		
 		//Once successfully load any not-loaded files, continue
-		L.load(input).then(()=>{
-			L.track[layer]=input;
+		L.load(replacement).then(()=>{
+			L.track[layer]=replacement;
 			playBuffer(playThis,(new Date().getTime()-timeStartedLoop)/1000);
 		});
 	}
