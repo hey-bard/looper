@@ -17,6 +17,9 @@
 	<link rel="shortcut icon" href="/favicons/favicon.ico">
 	<meta name="msapplication-config" content="/favicons/browserconfig.xml">
 	<meta name="theme-color" content="#ffffff">
+	
+	<link rel="stylesheet" href="objprint/styles.css">
+	<script src="objprint/script.js"></script>
 </head>
 <body>
 <header>
@@ -65,79 +68,18 @@
 	<option value='null'>null</option>
 </select>-->
 
-<script>
-//TEST//
-var song=new Looper({
-	path:'music/beat/'
-	,track:[
-		['kick']
-		,[null,null,null,null,'clap']
-		,[null,'hat',null,'hat',null]
-		,[null,'snare',null,'snare',null]
-		,[null,'synth','synth','synth','synth']
-	]
-	,bars:5
-	,repeatFrom:1
-	,loop:true
-});
-
-/*
-//WACKY//
-var song=new Looper({
-	path:'music/silly/'
-	,track:[
-		['drums/a1','drums/b1']
-		,['bass/main',null,null,null]
-		,['harmony',null,null,null]
-		,[null,null,null,null,	'melody/first',null,null,null,	null,null,null,null,				'melody/first',null,null,null]
-		,[null,null,null,null,	null,null,null,null,			'melody/second',null,null,null,		'melody/second',null,null,null]
-		,[null,null,null,null,	'bass/upper',null,null,null,	'bass/upper',null,null,null,		'bass/upper',null,null,null]
-		,[null,null,null,null,	null,null,null,null,			null,null,null,null,				'bass/extra',null,null,null]
-	]
-	,bars:16
-	,repeatFrom:12
-	,loop:true
-});*/
-/*
-//CLOSURE//
-var song=new Looper({
-	path:'music/closure/'
-	,track:[
-		['harmony/starting']
-		,[null,'harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal']
-		,[null,null,null,'kick','kick','kick','kick','kick','kick','kick','kick','kick']
-		,[null,null,null,'bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub']
-		,[null,null,null,null,null,null,'snap','snap','snap','snap','snap','snap']
-		,[null,null,null,null,null,null,null,null,null,'melody',null,'bass/cello']
-		,[null,null,null,null,null,null,null,null,'harmony/emotion','harmony/emotion','harmony/emotion','harmony/emotion']
-		,[null,null,null,null,null,null,null,null,null,null,null,'harmony/deep-emotion']
-		,[null,null,null,null,null,null,null,null,null,null,null,'hat']
-	]
-	,bars:12
-	,repeatFrom:8
-	,loop:true
-});*/
-
-</script>
-
 <h2>Install in 5 minutes!</h2>
 
 <p><a href="https://github.com/joshpowlison/looper/releases" target="_blank">Download</a> and put the <em>looper</em> folder on your website. Use this HTML:</p>
 
 <pre>
 &lt;script src="looper/script.js"&gt;&lt;/script&gt;
-&lt;script&gt;new Looper;&lt;/script&gt;
+&lt;script&gt;new Looper(SETTINGS);&lt;/script&gt;
 </pre>
 
-<p>To customize your Looper, look at the code below!</p>
+<p>Below is an example of a settings object:</p>
 
-<pre>
-&lt;script&gt;
-new Looper({
-<span id="code"></span>
-});
-&lt;/script&gt;
-
+<div id="code"></div>
 <p id="propertyExplanation"></p></pre>
 
 <!--<h2>Used by:</h3>

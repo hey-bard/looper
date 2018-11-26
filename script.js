@@ -1,77 +1,87 @@
-var container=document.createElement("p");
-	
-var objects=Object.keys(song);
-
-for(var i=0;i<objects.length;i++){
-	var line=document.createElement("span");
-	
-	line.innerHTML+='    <span class="obj-name">'+objects[i]+'</span>: ';
-	var value=song[objects[i]];
-	
-	var print='';
-	var valuePrint=document.createElement("span");
-	
-	switch(typeof value){
-		case 'number':
-			print+=value;
-			break;
-		case 'boolean':
-			print+=value ? 'true' : 'false';
-			break;
-		case 'string':
-			print+='"'+value+'"';
-			break;
-		case 'object':
-			if(value && value.id) print+='document.getElementById("'+value.id+'")';
-			else print+=JSON.stringify(value,null,'    ');
-			break;
-		default:
-			//
-			break;
-	}
-	
-	valuePrint.innerText=print;
-
-	line.appendChild(valuePrint);
-	container.appendChild(line);
-	
-	if(i<objects.length-1){
-		container.innerHTML+=',<br>';
-	}
+// SETUP //
+var settings={
+	path:'music/beat/'
+	,track:[
+		['kick']
+		,[null,null,null,null,'clap']
+		,[null,'hat',null,'hat',null]
+		,[null,'snare',null,'snare',null]
+		,[null,'synth','synth','synth','synth']
+	]
+	,bars:5
+	,repeatFrom:1
+	,loop:true
 }
 
-document.getElementById("code").innerHTML=container.innerHTML;
-document.getElementById("propertyExplanation").innerHTML='Hover over a property to get info on it!';
+var printer=new ObjPrint({
+	window:document.getElementById('code')
+	,explanationWindow:document.getElementById('propertyExplanation')
+	,properties:{
+		adjustLayer:"A public function for adjusting a layer while Looper is playing."
+		,'adjustLayer(layer)':"The layer's number. Can also be 'new' to make a new layer."
+		,'adjustLayer(input)':"An array of the replacement content for the layer."
+		,autoplay:"Whether or not to play as soon as it loads. Defaults to <em>false</em>."
+		,bars:"The total number of bars in the song."
+		,context:"The audio context in use."
+		,currentBar:"The bar of the song we're on."
+		,load:"A public function for loading the files."
+		,loop:"Whether or not we'll play at the end. I mean, it's called Looper, yeah, but this is still an option. Defaults to <em>false</em>"
+		,path:"The path to the song's folder."
+		,'load(files)':'An array of files to load.'
+		,pause:"A public function for pausing the Looper. If played again, it will continue from where it was paused."
+		,play:"A public function for playing the Looper."
+		,remove:"Gets rid of the Looper and closes its audio context."
+		,repeatFrom:"When reach the end of the song, which bar to return to."
+		,stop:"A public function for stopping the Looper. If played again, it will play from the Looper's beginning."
+		,track:"Contains an array of all the layers. The first item in the first array sets the duration of a loop. May reference files (assumed to be .mp3s) or be <em>null</em>."
+		,'track.#':"A layer."
+		,'track.#.#':"Plays in this layer during the nth loop. If <em>null</em>, nothing plays in this layer during the nth loop."
+	}
+});
 
-var properties=document.querySelectorAll(".obj-name");
-for(var i=0;i<properties.length;i++){
-	properties[i].addEventListener("mouseover",function(){
-		if(document.querySelector('.obj-name-study')) document.querySelector('.obj-name-study').classList.remove('obj-name-study');
-		
-		this.classList.add('obj-name-study');
-		
-		document.getElementById("propertyExplanation").innerHTML="<strong>"+this.innerHTML+"</strong>: "+(propertyInfo[this.innerHTML]);
-	});
-}
+printer.print(settings);
 
-var propertyInfo={
-	context:"The audio context in use."
-	,currentBar:"The bar of the song we're on."
-	,bars:"The total number of bars in the song."
-	,repeatFrom:"When reach the end of the song, which bar to return to."
-	,track:"Contains an array of all the layers. The first item in the first array sets the duration of a loop. May reference files (assumed to be .mp3s) or be <em>null</em>."
-	,path:"The path to the song's folder."
-	,loop:"Whether or not we'll play at the end. I mean, it's called Looper, yeah, but this is still an option. Defaults to <em>false</em>"
-	,autoplay:"Whether or not to play as soon as it loads. Defaults to <em>false</em>."
-	,load:"A public function for loading the files."
-	,play:"A public function for playing the Looper."
-	,pause:"A public function for pausing the Looper. If played again, it will continue from where it was paused."
-	,stop:"A public function for stopping the Looper. If played again, it will play from the Looper's beginning."
-	,remove:"Gets rid of the Looper and closes its audio context."
-	,adjustLayer:"A public function for adjusting a layer while Looper is playing."
-};
+var song=new Looper(settings);
+
+/*
+//WACKY//
+var song=new Looper({
+	path:'music/silly/'
+	,track:[
+		['drums/a1','drums/b1']
+		,['bass/main',null,null,null]
+		,['harmony',null,null,null]
+		,[null,null,null,null,	'melody/first',null,null,null,	null,null,null,null,				'melody/first',null,null,null]
+		,[null,null,null,null,	null,null,null,null,			'melody/second',null,null,null,		'melody/second',null,null,null]
+		,[null,null,null,null,	'bass/upper',null,null,null,	'bass/upper',null,null,null,		'bass/upper',null,null,null]
+		,[null,null,null,null,	null,null,null,null,			null,null,null,null,				'bass/extra',null,null,null]
+	]
+	,bars:16
+	,repeatFrom:12
+	,loop:true
+});*/
+/*
+//CLOSURE//
+var song=new Looper({
+	path:'music/closure/'
+	,track:[
+		['harmony/starting']
+		,[null,'harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal','harmony/normal']
+		,[null,null,null,'kick','kick','kick','kick','kick','kick','kick','kick','kick']
+		,[null,null,null,'bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub','bass/sub']
+		,[null,null,null,null,null,null,'snap','snap','snap','snap','snap','snap']
+		,[null,null,null,null,null,null,null,null,null,'melody',null,'bass/cello']
+		,[null,null,null,null,null,null,null,null,'harmony/emotion','harmony/emotion','harmony/emotion','harmony/emotion']
+		,[null,null,null,null,null,null,null,null,null,null,null,'harmony/deep-emotion']
+		,[null,null,null,null,null,null,null,null,null,null,null,'hat']
+	]
+	,bars:12
+	,repeatFrom:8
+	,loop:true
+});*/
 
 //UI BUTTONS//
+
 document.getElementById('play').addEventListener('click',function(){
 	song.play();
 });
